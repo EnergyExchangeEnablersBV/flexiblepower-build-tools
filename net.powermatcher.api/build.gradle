@@ -1,5 +1,3 @@
-check.enabled = false
-
 publishing {
     publications {
         mavenJava(MavenPublication) {

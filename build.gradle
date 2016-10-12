@@ -11,6 +11,42 @@ generateJavadoc.source = fileTree('.') {
 generateJavadoc.enabled = true
 
 
+/* Add bnd as a script dependency */
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.5"
+    }
+}
+
+allprojects {
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'maven-publish'
+}
+
+artifactory {
+    contextUrl = 'https://artifactory.e-x-e.cloud/artifactory'
+    //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            repoKey = 'powermatcher-repo'   //The Artifactory repository key to publish to
+            username = 'jenkins'          //The publisher user name
+            password = '1hh8Jdye6wicd0YEOVJu'
+            maven = true
+        }
+        defaults {
+            publications('mavenJava')
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-releases'  //The Artifactory (preferably virtual) repository key to resolve from
+        }
+    }
+}
+
 // Generate sonar-runner.properties containing all projects and jars
 task generatesonar << {
 
