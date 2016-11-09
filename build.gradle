@@ -27,7 +27,7 @@ allprojects {
 }
 
 artifactory {
-    contextUrl = 'https://artifactory.e-x-e.cloud/artifactory'
+    contextUrl = 'http://artifactory.e-x-e.cloud/artifactory'
     //The base Artifactory URL if not overridden by the publisher/resolver
     publish {
         repository {
