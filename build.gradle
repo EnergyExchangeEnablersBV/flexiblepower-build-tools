@@ -87,7 +87,7 @@ task generatesonar << {
 
         // Check for output directory
         if (new File(item, 'generated').exists()) {
-            settingsFile << "$item" << '/generated/' << "$item" << '.jar'
+            settingsFile << "$item" << 'generated/' << "$item" << '.jar'
         }
     }
 
