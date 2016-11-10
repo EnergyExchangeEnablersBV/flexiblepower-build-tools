@@ -3,9 +3,17 @@ publishing {
         mavenJava(MavenPublication) {
             groupId project.name
             version '1.0.0'
-            artifactId project.name
-            artifact file("generated/${project.name}.client.jar")
+            artifactId "${project.name}.server"
             artifact file("generated/${project.name}.server.jar")
+        }
+
+        mavenJava2(MavenPublication) {
+            groupId project.name
+            version '1.0.0'
+            artifactId "${project.name}.client"
+
+            artifact file("generated/${project.name}.client.jar")
+
         }
     }
 }

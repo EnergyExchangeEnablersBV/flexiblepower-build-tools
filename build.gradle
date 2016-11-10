@@ -37,7 +37,7 @@ artifactory {
             maven = true
         }
         defaults {
-            publications('mavenJava')
+            publications('mavenJava',  'mavenJava2' )
         }
     }
     resolve {
