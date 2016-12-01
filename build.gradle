@@ -1,5 +1,12 @@
 apply from: rootProject.file("${bnd_cnf}/gradle/master.gradle")
 
+// Copy from artifactory
+task (copyCoreDependencies, type: Copy) {
+    from fileTree("cnf/cache/").files
+    into 'cnf/repo/core_dependencies'
+    include '**/*.jar'
+}
+
 // Reconfigure the Javadoc classes
 generateJavadoc.source = fileTree('.') {
                              include 'net.powermatcher.api/**/*.java'
