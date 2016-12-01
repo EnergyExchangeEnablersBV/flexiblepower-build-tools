@@ -8,7 +8,8 @@
 	net.powermatcher.core;version=latest,\
 	com.google.gson,\
     org.apache.felix.http.servlet-api;version=latest,\
-    org.apache.felix.http.jetty;version=latest
+    org.apache.felix.http.jetty;version=latest,\
+	net.powermatcher.api;version=latest
 -includeresource: \
 	{OSGI-INF/permissions.perm=permissions.perm},\
 	../cnf/gradle/LICENSE.txt
