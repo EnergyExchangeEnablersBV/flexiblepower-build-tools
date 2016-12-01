@@ -8,7 +8,8 @@
 	net.powermatcher.core;version=latest,\
 	com.google.gson,\
 	org.apache.felix.http.servlet-api,\
-	org.apache.felix.metatype
+	org.apache.felix.metatype,\
+	net.powermatcher.api;version=latest
 -testpath: ${test}
 
 Bundle-Version: 2.0.1.${tstamp}
