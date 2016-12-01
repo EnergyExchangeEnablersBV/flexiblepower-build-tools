@@ -2,7 +2,8 @@ Git-Descriptor: ${system-allow-fail;git describe --dirty --always}
 Git-SHA: ${system-allow-fail;git rev-list -1 HEAD}
 
 default-buildpath: \
-	flexiblepower.api;version=latest,\
+	flexiblepower.api:flexiblepower.api;version=3.0.0;strategy=exact,\
+	flexiblepower.ui:flexiblepower.ui;version=1.0.0;strategy=exact, \
 	biz.aQute.bnd.annotation;version="[1.43,3.0)",\
 	osgi.core;version="[4.3.1,5.0)",\
 	osgi.cmpn;version="[4.3.1,5.0)",\
@@ -10,16 +11,23 @@ default-buildpath: \
 
 fpai-buildpath: \
 	${default-buildpath},\
-	flexiblepower.ral;version=latest,\
+	flexiblepower.ui:flexiblepower.ui;version=1.0.0;strategy=exact, \
+	flexiblepower.ral:flexiblepower.ral;version=1.0.0;strategy=exact, \
+	flexiblepower.ral.efi.utils:flexiblepower.ral.efi.utils;version=1.0.0;strategy=exact, \
 	flexiblepower.ral.ext;version=latest,\
-	flexiblepower.ral.efi;version=latest
+	flexiblepower.ral.efi:flexiblepower.ral.efi;version=1.0.0;strategy=exact,\
+	flexiblepower.runtime:flexiblepower.runtime;version=1.0.0;strategy=exact,\
+	flexiblepower.runtime.simulation:flexiblepower.runtime.simulation;version=1.0.0;strategy=exact,\
+	flexiblepower.ui.connectionspage:flexiblepower.ui.connectionspage;version=1.0.0;strategy=exact,\
+	com.google.guava:guava;version=14.0.1;strategy=exact,\
+	com.eclipsesource.jaxrs:provider-gson;version=1.0;strategy=exact
 
 test-buildpath: \
 	junit.osgi;version=latest,\
 	org.hamcrest.core;version=latest,\
 	org.mockito.mockito-all;version=latest,\
 	junit
-	
+
 Bundle-Vendor: Flexiblepower Alliance Network (FAN)
 Include-Resource: res, ../cnf/gradle/LICENSE.txt
 Bundle-Copyright: Copyright Flexiblepower Alliance Network (FAN) 2013
