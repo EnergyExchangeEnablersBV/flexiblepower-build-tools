@@ -1,4 +1,5 @@
--pluginpath: ${workspace}/cnf/gradle/bnd/biz.aQute.repository.jar
+-pluginpath: ${workspace}/cnf/gradle/bnd/biz.aQute.repository.jar,\
+             ${workspace}/cnf/gradle/bnd/biz.aQute.repository.aether.jar
 
 -plugin: \
     aQute.bnd.deployer.repository.aether.AetherRepository; name=Artifactory; url=http://artifactory.e-x-e.cloud/artifactory/remote-repos; cache=${workspace}/cnf/cache, \
