@@ -1,2 +1,0 @@
-apply from: file("${bnd_cnf}/gradle/init.gradle")
-rootProject.name = 'powermatcher'

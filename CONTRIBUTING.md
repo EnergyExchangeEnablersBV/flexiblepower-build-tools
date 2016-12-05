@@ -19,9 +19,8 @@ Best way to get started is to start with these:
 * Onboarding process: <https://github.com/flexiblepower/FAN-wiki/wiki/On-boarding-process>
 * General wiki: <https://github.com/flexiblepower/FAN-wiki/wiki>
 * Website:  <http://www.powermatcher.org>
-* Project specific issues: <https://github.com/flexiblepower/powermatcher/issues> / <https://waffle.io/flexiblepower/powermatcher>
-* Project specific Gitbook: <http://fpai-ci.sensorlab.tno.nl/builds/powermatcher-documentation/master/html/Architecture-PowerMatcher.html>
-* Project documentation repository: https://github.com/flexiblepower/powermatcher-documentation
+* Project specific issues: <https://github.com/flexiblepower/fpai-shared-config/issues>
+* Project specific wiki: <https://github.com/flexiblepower/fpai-shared-config/wiki>
 
 # New features
 
@@ -30,4 +29,3 @@ Best way to get started is to start with these:
 # Bug triage
 
 <https://github.com/flexiblepower/FAN-wiki/wiki/Bug-tracking-process>
-

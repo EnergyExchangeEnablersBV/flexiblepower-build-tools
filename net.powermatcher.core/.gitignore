@@ -1,7 +1,0 @@
-/bin_test/
-/bin/
-/generated/
-cnf/cache
-cnf/release
-.gradle
-.idea

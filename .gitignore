@@ -1,16 +1,1 @@
-bin/
-*.class
-.metadata/
-generated/
-.svn/
-cnf/cache/
-cnf/release/
-.gradle/
-.sonar/
-build/
-sonar-runner.properties
-RemoteSystemsTempFiles/.project
-*/bin_test/*
-.recommenders/
-testdir/
-.com_puppetlabs_geppetto_pptp_target
+# Created by .ignore support plugin (hsz.mobi)

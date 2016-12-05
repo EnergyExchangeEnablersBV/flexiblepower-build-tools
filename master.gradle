@@ -1,0 +1,235 @@
+import aQute.bnd.deployer.repository.LocalIndexedRepo
+import aQute.bnd.osgi.Jar
+import aQute.bnd.version.Version
+import aQute.lib.io.IO
+import aQute.lib.hex.Hex
+import java.security.MessageDigest
+
+/* Add bnd as a script dependency */
+buildscript {
+  dependencies {
+    classpath files(bndURI, bndRepoURI)
+  }
+}
+
+/* Load the BndPlugin class */
+apply from: buildscript.classLoader.getResource('aQute/bnd/gradle/BndPlugin.gradle')
+
+def bndProjects() {
+	subprojects.findAll { bndWorkspace.getProject(it.name) != null }
+}
+
+/* Configure the subprojects */
+subprojects {
+  def bndProject = bndWorkspace.getProject(name)
+  if (bndProject != null) {
+    plugins.apply BndPlugin
+ 
+ 	ext.baseDir = "${releaseDir}/${name}/${workingBranch}/${qualifier}"
+ 	bndProject.setProperty("qualifier", qualifier)
+ 
+    repositories {
+      jcenter()
+    }
+
+    apply plugin: 'jacoco'
+    jacoco {
+      toolVersion = "0.7.1.201405082137"
+      reportsDir = file("$buildDir/jacoco")
+    }
+  
+    jacocoTestReport {
+      additionalSourceDirs = files(sourceSets.main.allJava.srcDirs)
+      reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination "${buildDir}/jacoco/html"
+      }
+    }
+
+    apply plugin: 'checkstyle'
+    checkstyle {
+      configFile = file("${cnf.projectDir}/gradle/checkstyle/configuration.xml")
+      ignoreFailures = true
+      showViolations = false
+      configProperties.put("samedir", "${cnf.projectDir}/gradle/checkstyle")
+    }
+
+    task cleanGenerated(type: Delete) {
+      delete 'generated'
+    }
+  }
+}
+
+ext.deploymentDir = file("${releaseDir}/${project.name}/${workingBranch}/${qualifier}")
+
+task(cleanDeployment, type: Delete) {
+	delete "${deploymentDir.absolutePath}"
+
+	doLast {
+		deploymentDir.mkdirs()
+	}
+}
+
+class FlatReleaseRepo {
+	private String repoName;
+	private File baseDir;
+	private Set<File> storedFiles;
+
+	FlatReleaseRepo(File baseDir, String repoName) {
+		this.baseDir = baseDir;
+		this.repoName = repoName;
+		storedFiles = new HashSet<File>();
+	}
+
+	File put(File original) {
+		def jar = new Jar(original);
+		try {
+			def bsn = jar.getBsn();
+			def version = Version.parseVersion(jar.getVersion());
+			def fName = bsn + "-" + version.getWithoutQualifier() + ".jar";
+			def file = new File(baseDir, fName);
+			jar.close();
+
+			IO.copy(original, file);
+
+			storedFiles.add(file);
+			return file;
+		} finally {
+			jar.close();
+		}
+	}
+
+	void generateIndex() {
+		def provider = new aQute.bnd.deployer.repository.providers.R5RepoContentProvider();
+		def indexFile = new File(baseDir, "index.xml");
+		def out = new FileOutputStream(indexFile);
+		try {
+			provider.generateIndex(storedFiles,
+			                       out,
+			                       repoName,
+			                       baseDir.getCanonicalFile().toURI(),
+			                       true,
+			                       null,
+			                       null);
+		} finally {
+			IO.close(out);
+		}
+
+		MessageDigest sha = MessageDigest.getInstance("SHA-256");
+		IO.copy(indexFile, sha);
+		IO.store(Hex.toHexString(sha.digest()).toLowerCase(), new File(baseDir, "index.xml.sha"));
+	}
+}
+
+task(releaseBundles) {
+	dependsOn bndProjects().build
+	
+	doFirst {
+		def repoDir = new File(deploymentDir, "repo")
+		if(!repoDir.exists()) {
+			repoDir.mkdirs()
+		}
+		def publishRepo = new FlatReleaseRepo(repoDir, "${project.name} ${project.qualifier}");
+		bndProjects().each{
+			if(!it.name.contains(".test")) {
+				bndWorkspace.getProject(it.name).getBuildFiles().each{
+					publishRepo.put(it)
+				}
+			}
+		}
+		publishRepo.generateIndex();
+	}
+}
+
+task(generateSourceZip, type: Zip) {
+	from '.'
+	include '*/**'
+	exclude '*/generated'
+	exclude '*/bin'
+	exclude '*/build'
+	exclude '*/bin_test'
+	exclude 'cnf*/cache/**'
+	exclude 'cnf*/release/**'
+	exclude '.metadata'
+	exclude '.recommenders'
+	exclude '.gradle'
+	exclude 'build'
+	exclude 'RemoteSystemsTempFiles'
+	destinationDir = deploymentDir
+	archiveName = "${project.name}-sources-${qualifier}.zip"
+}
+
+task(generateBundleZip, type: Zip, dependsOn: releaseBundles) {
+	from "${deploymentDir.absolutePath}/repo"
+	include '**'
+	destinationDir = deploymentDir
+	archiveName = "${project.name}-bundles-${qualifier}.zip"
+}
+
+task(generateJavadoc, type: Javadoc) {
+	def classes = fileTree('.') {
+		include '*.api*/**/*.java'
+		exclude '*.test/*'
+		exclude '**/*Test.java'
+	}
+	source = classes
+	enabled = !classes.empty 
+	destinationDir = file("${deploymentDir.absolutePath}/javadoc")
+	failOnError = false
+	options {
+		classpath file(bndURI)
+		classpath fileTree('cnf/cache') {
+			include '**/*.jar'
+		}.getFiles().toArray(new File[0])
+		encoding = 'UTF-8'
+		windowTitle = project.name
+		showFromProtected()
+		addStringOption("sourcepath", "")
+	}
+}
+
+task(generateJavadocZip, type: Zip, dependsOn: generateJavadoc) {
+	from "${deploymentDir.absolutePath}/javadoc"
+	include '**'
+	destinationDir = deploymentDir
+	archiveName = "${project.name}-javadoc-${qualifier}.zip"
+}
+
+task(generateRuntime, type: Zip) {
+	def run = project.hasProperty('runtimeBndrunFile') ? bndWorkspace.getRun(file(runtimeBndrunFile)) : null
+	enabled = run != null
+
+	def runtimeDeploymentDir = project.hasProperty('runtimeDeploymentDir') ? project.getProperty('runtimeDeploymentDir') : "${bnd_cnf_shared}/deployment"
+
+	destinationDir = deploymentDir
+	archiveName = "${project.name}-runtime-${qualifier}.zip"
+
+	from(runtimeDeploymentDir) {
+		include("run.*")
+		fileMode = 0755
+		into('/')
+	}
+	from(runtimeDeploymentDir) {
+		exclude("run.*")
+		into('/')
+	}
+
+	if(run != null) {
+		run.getRunbundles().each { c ->
+			from(c.file) {
+				rename('.*', "bundles/${c.bundleSymbolicName}-${c.version}.jar")
+			}
+		}
+	}
+}
+
+task(distribute, dependsOn: [cleanDeployment, generateSourceZip, generateBundleZip, generateJavadocZip, generateRuntime]) {
+	dependsOn bndProjects().jacocoTestReport
+	description "Generation a distribution (e.g. now in ${deploymentDir.absolutePath})"
+	doLast {
+		ant.symlink(link: "${releaseDir}/${project.name}/${workingBranch}/LATEST",
+		            resource: "${releaseDir}/${project.name}/${workingBranch}/${qualifier}",
+		            overwrite: true)
+	}
+}
